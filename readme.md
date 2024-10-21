@@ -6,11 +6,12 @@ conda env create -f environment.yml
 pip install -r requirements.txt
 ```
 
+Add dep
 ```
 pipreqs ./ --force
 ```
 
-## Create this file (add github token)
+## Create `.env` file (add github token)
 `fetch-data/.env`
 ```
 GITHUB_TOKEN=ghp_qs****************************
