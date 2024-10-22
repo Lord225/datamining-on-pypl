@@ -2,6 +2,7 @@ import csv
 import requests
 import os
 import tqdm
+import common
 
 def download_repo_as_zip(repo_name, branch_url, save_path):
     # Modify the branch_url to get the download link for the ZIP archive
@@ -10,7 +11,7 @@ def download_repo_as_zip(repo_name, branch_url, save_path):
 
     try:
         print(f"Downloading {repo_name} from {zip_url}")
-        response = requests.get(zip_url, stream=True)
+        response = requests.get(zip_url, stream=True, headers=common.get_auth_headers())
         
         # Check if the request was successful
         if response.status_code == 200:
@@ -52,7 +53,7 @@ def download_repositories(csv_file, save_path):
 
 if __name__ == "__main__":
     # Replace 'repos.csv' with the actual path to your CSV file
-    csv_file_path = 'repos.csv'
+    csv_file_path = './fetch-data/repos.csv'
     
     # Replace with the desired path where you want to save the ZIP files
     save_directory = 'downloaded_repos'
