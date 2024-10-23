@@ -33,29 +33,31 @@ def download_repo_as_zip(repo_name, branch_url, save_path):
     except Exception as e:
         print(f"Error downloading {repo_name}: {e}")
 
-def download_repositories(csv_file, save_path):
+def download_repositories(save_path):
+    import pandas as pd
+    conn = common.get_postgres()
+
+    # fetch all the repositories to pd.DataFrame
+    repos = pd.read_sql('SELECT * FROM repos', conn)
+
     # Ensure the save_path directory exists
     if not os.path.exists(save_path):
         os.makedirs(save_path)
 
-    with open(csv_file, mode='r', encoding='utf-8') as file:
-        reader = csv.DictReader(file)
+    for index, row in tqdm.tqdm(repos.iterrows(), total=repos.shape[0]):
+        # Extract the necessary information from the DataFrame
+        repo_name = row.get('name')
+        branch_url = row.get('branch_url')
         
-        for row in tqdm.tqdm(reader):
-            # Extract the necessary information from the CSV
-            repo_name = row.get('name')
-            branch_url = row.get('branch_url')
-            
-            if repo_name and branch_url:
-                download_repo_as_zip(repo_name, branch_url, save_path)
-            else:
-                print(f"Missing repository name or branch_url for row: {row['id']}")
+        if repo_name and branch_url:
+            download_repo_as_zip(repo_name, branch_url, save_path)
+        else:
+            print(f"Missing repository name or branch_url for row: {row['id']}")
 
 if __name__ == "__main__":
     # Replace 'repos.csv' with the actual path to your CSV file
-    csv_file_path = './fetch-data/repos.csv'
     
     # Replace with the desired path where you want to save the ZIP files
     save_directory = 'downloaded_repos'
     
-    download_repositories(csv_file_path, save_directory)
+    download_repositories(save_directory)
