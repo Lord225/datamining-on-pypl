@@ -18,3 +18,7 @@ GITHUB_TOKEN=ghp_qs****************************
 SLICE_START=0
 SLICE_START=10
 ```
+
+# postgres
+`docker compose -f docker-compose.yml up --build -d`
+Some scripts will try to connect / insert data into postgres. 

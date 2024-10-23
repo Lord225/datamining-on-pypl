@@ -1,7 +1,7 @@
 import argparse
 import pandas as pd
 import glob
-
+import common
 # python fetch-data\stitch.py ./fetch-data/repo_info-*.csv
 
 parser = argparse.ArgumentParser(description='Stitch together the data from multiple csv files')
@@ -21,7 +21,11 @@ print(args.files)
 
 dfs = [pd.read_csv(f) for f in args.files]
 
-
 df = pd.concat(dfs, ignore_index=True)
 
-df.to_csv(args.output, index=False)
+df.drop_duplicates(subset=['full_name'], inplace=True)
+
+df.drop('Unnamed: 0', axis=1, inplace=True)
+
+conn = common.get_postgres()
+df.to_sql('repos', conn, if_exists='replace')
