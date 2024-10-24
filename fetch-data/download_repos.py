@@ -11,24 +11,24 @@ def download_repo_as_zip(repo_name, branch_url, save_path):
 
     try:
         print(f"Downloading {repo_name} from {zip_url}")
-        response = requests.get(zip_url, stream=True, headers=common.get_auth_headers())
-        
-        # Check if the request was successful
-        if response.status_code == 200:
-            # Define the zip file path where the repo will be saved
-            zip_file_path = os.path.join(save_path, f"{repo_name}.zip")
 
-            if not os.path.exists(zip_file_path):            
-            # Write the content of the request to a file
+        zip_file_path = os.path.join(save_path, f"{repo_name}.zip")
+        
+        if not os.path.exists(zip_file_path):            
+            response = requests.get(zip_url, stream=True, headers=common.get_auth_headers())
+            # Check if the request was successful
+            if response.status_code == 200:
                 with open(zip_file_path, 'wb') as zip_file:
                     for chunk in response.iter_content(chunk_size=128):
                         zip_file.write(chunk)
-                
-                print(f"Successfully downloaded {repo_name} as {zip_file_path}")
             else:
-                print(f"Skipping {repo_name} as {zip_file_path} already exists")
+                print(f"Failed to download {repo_name}. HTTP Status Code: {response.status_code}")
+            
+            print(f"Successfully downloaded {repo_name} as {zip_file_path}")
         else:
-            print(f"Failed to download {repo_name}. HTTP Status Code: {response.status_code}")
+            print(f"Skipping {repo_name} as {zip_file_path} already exists")
+        
+
     
     except Exception as e:
         print(f"Error downloading {repo_name}: {e}")
