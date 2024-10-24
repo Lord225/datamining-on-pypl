@@ -1,4 +1,3 @@
-import chunk
 import logging
 from pathlib import Path
 from zipfile import ZipFile, BadZipFile
