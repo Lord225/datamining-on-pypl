@@ -1,17 +1,11 @@
 import logging
-from pathlib import Path
-from zipfile import ZipFile, BadZipFile
-import tqdm
 import common
 from sqlalchemy import text
-import argparse
 import ast
 import pandas as pd
 from dask import dataframe as dd 
-import psycopg2
 from sqlalchemy.engine.url import make_url
-from dask.diagnostics import ProgressBar
-from dask.delayed import delayed
+from dask.diagnostics import ProgressBar # type: ignore
 
 logging.basicConfig(level=logging.INFO)
 
