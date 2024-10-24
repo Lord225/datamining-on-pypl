@@ -15,5 +15,4 @@ def get_auth_headers():
 
 def get_postgres():
     engine = sa.create_engine('postgresql://postgres:8W0MQwY4DINCoX@localhost:5432/data-mining')
-
     return engine.connect()
