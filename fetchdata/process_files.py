@@ -1,6 +1,5 @@
 import logging
 import common
-from sqlalchemy import text
 import ast
 import pandas as pd
 from dask import dataframe as dd 
@@ -59,6 +58,48 @@ def analyze_python_code(code):
             "functions": [],
         }
 
+import re
+
+def extract_docstring(body):
+    """
+    Extract the first comment line as a pseudo-docstring or a traditional docstring if it exists.
+    Return the modified function body without the pseudo-docstring or docstring and the extracted text.
+    """
+    try:
+        # Check if there's a docstring in the AST
+        tree = ast.parse(body)
+        docstring = ast.get_docstring(tree)
+        
+        # If a docstring exists, remove it
+        if docstring:
+            for node in tree.body:
+                if isinstance(node, ast.Expr) and isinstance(node.value, ast.Str):
+                    tree.body.remove(node)
+                    break
+            body_without_docstring = ast.unparse(tree)
+        else:
+            # If no docstring, look for a first-line comment as a pseudo-docstring
+            lines = body.splitlines()
+            pseudo_docstring = None
+            body_start = 0
+
+            # Check if the first line is a comment
+            if lines and re.match(r'^\s*#', lines[0]):
+                pseudo_docstring = lines[0].lstrip('#').strip()  # Extract the comment text
+                body_start = 1  # Start body after the first comment line
+            
+            # Join remaining lines to reconstruct the body without the first-line comment
+            body_without_docstring = "\n".join(lines[body_start:]).strip()
+            docstring = pseudo_docstring if pseudo_docstring else None
+        body_without_docstring = body_without_docstring.replace('\x00', '')
+        docstring = docstring.replace('\x00', '') if docstring else None
+
+        return body_without_docstring, docstring
+    except Exception as e:
+        logging.error(f"Error extracting docstring: {e}")
+        return body, None
+        
+
 if __name__ == '__main__':
     url = make_url(conn.engine.url)
     conn_str = f"postgresql://{url.username}:{url.password}@{url.host}:{url.port}/{url.database}"
@@ -67,7 +108,6 @@ if __name__ == '__main__':
                               conn_str, 
                               index_col='id', 
                               bytes_per_chunk='100kb', 
-                              # limits=(1000,1500)
                             )
     def analyze_code(row):
         code = row['content']
@@ -88,8 +128,13 @@ if __name__ == '__main__':
         args=querry['functions'].apply(lambda x: x['args'], meta=('args', 'str')),
         args_types=querry['functions'].apply(lambda x: x['args_types'], meta=('args_types', 'str')),
         args_defaults=querry['functions'].apply(lambda x: x['args_defaults'], meta=('args_defaults', 'str')),
-        body=querry['functions'].apply(lambda x: x['body'], meta=('body', 'str')),
-    ).drop(columns=['functions'])
+        body_and_docstring=querry['functions'].apply(lambda x: extract_docstring(x['body']), meta=('body_and_docstring', 'object'))
+    )
+
+    querry = querry.assign(
+        body=querry['body_and_docstring'].apply(lambda x: x[0] if x else None, meta=('body', 'str')),
+        docstring=querry['body_and_docstring'].apply(lambda x: x[1] if x else None, meta=('docstring', 'str'))
+    ).drop(columns=['functions', 'body_and_docstring'])
 
     results = querry.compute(scheduler='processes', num_workers=16, optimize_graph=True)
 
