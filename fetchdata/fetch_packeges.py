@@ -1,7 +1,6 @@
 # %%
 import pandas as pd
 import json
-from bs4 import BeautifulSoup as bs
 import argparse
 
 parser = argparse.ArgumentParser(description='Fetch top packages from PyPI')
@@ -49,28 +48,6 @@ import os
 
 base_pypl_url = "https://pypi.org/project/{}"
 
-def get_repo_info(repo_name):
-    url = base_pypl_url.format(repo_name)
-
-    try:
-        response = urllib.request.urlopen(url)
-        html = response.read()
-
-        bsObj = bs(html, features="html.parser")
-        
-        github = bsObj.find('a', href=lambda href: href and "github.com" in href)
-        if github is not None:
-            github_url = github['href']
-        else:
-            github_url = None
-
-        if isinstance(github_url, list):
-            return github_url[0]
-
-        return github_url
-    except Exception as e:
-        print(f"Error fetching {repo_name}: {e}")
-        return None
 
 def strip(url: str):
     if not url:
@@ -107,12 +84,9 @@ if args.end:
 repo_names = packages['project'][SLICE_START:SLICE_END]
 
 # Run the tasks asynchronously
-repos = await fetch_all_repos(repo_names)
+repos = await fetch_all_repos(repo_names)  # type: ignore
 
 print(f"Found {len(repos)} repos")
-
-# %%
-repos
 
 # %%
 TOKEN = os.getenv("GITHUB_TOKEN")

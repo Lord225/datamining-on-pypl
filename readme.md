@@ -37,3 +37,10 @@ python ./fetch-data/extract_data_from_ziped_repos.py
 # analize and extract data from files in db and save to db
 python ./fetch-data/process_files.py
 ```
+
+
+# notatki
+* Semantic search
+* Clustering
+* bert fine tune on docstirng
+* generate docstrings for rest of the dataset
