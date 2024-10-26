@@ -136,6 +136,8 @@ if __name__ == '__main__':
         docstring=querry['body_and_docstring'].apply(lambda x: x[1] if x else None, meta=('docstring', 'str'))
     ).drop(columns=['functions', 'body_and_docstring'])
 
+    querry = querry.drop_duplicates(subset=['body', 'name'])
+
     results = querry.compute(scheduler='processes', num_workers=16, optimize_graph=True)
 
     # set column max width
