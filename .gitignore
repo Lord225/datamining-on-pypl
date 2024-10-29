@@ -2,3 +2,4 @@
 __pycache__
 /downloaded_repos
 /database
+embeddings.h5
