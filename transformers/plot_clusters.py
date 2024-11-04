@@ -9,11 +9,11 @@ ProgressBar().register()
 
 # Load the data
 functions = dd.read_sql_table(
-    'functions',  # type: ignore
+    'functions',  
     'postgresql://postgres:8W0MQwY4DINCoX@localhost:5432/data-mining',
     index_col='id',
     bytes_per_chunk='10000kb'
-)
+) # type: ignore
 
 embeddings = pd.read_hdf('tsne_embeddings.h5', key='tsne_embeddings', mode='r')
 clusters = pd.read_hdf('clusters.h5', key='clusters', mode='r')
