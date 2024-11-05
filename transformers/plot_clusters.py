@@ -7,8 +7,9 @@ from dash import Dash, dcc, html, Input, Output
 # Enable progress bar
 ProgressBar().register()
 
-CLUSTERS = 'clusters_2.h5'
-EMBEDDINGS = 'tsne_embeddings_2.h5'
+CLUSTERS = 'clusters_3.h5'
+
+EMBEDDINGS = 'tsne_embeddings_3.h5'
 
 # Load the data
 functions = dd.read_sql_table(  # type: ignore
