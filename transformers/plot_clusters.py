@@ -7,16 +7,19 @@ from dash import Dash, dcc, html, Input, Output
 # Enable progress bar
 ProgressBar().register()
 
+CLUSTERS = 'clusters_2.h5'
+EMBEDDINGS = 'tsne_embeddings_2.h5'
+
 # Load the data
-functions = dd.read_sql_table(
+functions = dd.read_sql_table(  # type: ignore
     'functions',  
     'postgresql://postgres:8W0MQwY4DINCoX@localhost:5432/data-mining',
     index_col='id',
     bytes_per_chunk='10000kb'
-) # type: ignore
+)
 
-embeddings = pd.read_hdf('tsne_embeddings.h5', key='tsne_embeddings', mode='r')
-clusters = pd.read_hdf('clusters.h5', key='clusters', mode='r')
+embeddings = pd.read_hdf(EMBEDDINGS, key='tsne_embeddings', mode='r')
+clusters = pd.read_hdf(CLUSTERS, key='clusters', mode='r')
 
 # Prepare the data
 embeddings.columns = ['x', 'y']
@@ -32,21 +35,23 @@ body_dict = {k-1: v for k, v in body_dict.items()}
 
 clusters_embed['function'] = clusters_embed.index.map(function_dict.get)
 clusters_embed['body'] = clusters_embed.index.map(body_dict.get)
+clusters_embed['index'] = clusters_embed.index
 
 # Limit dataset to 50,000 samples for visualization
-clusters_embed = clusters_embed[:250_000]
+clusters_embed = clusters_embed[:500_000]
 
 # Plotly figure
 fig = px.scatter(
     clusters_embed, 
     x='x', 
     y='y', 
-    color='cluster', 
+    color='cluster',
+    custom_data='index',
     title='Cluster Plot',
     labels={'cluster': 'Cluster'},
     width=800,
     height=800,
-    opacity=0.5,
+    opacity=0.35,
 )
 
 # Initialize Dash app
@@ -67,7 +72,8 @@ app.layout = html.Div([
 def display_hover_data(hoverData):
     if hoverData:
         # Get the point's index
-        point_index = hoverData['points'][0]['pointIndex']
+        print(hoverData)
+        point_index = hoverData['points'][0]['customdata'][0]
         
         # Retrieve the detailed function and body from clusters_embed for the hovered point
         function = clusters_embed.iloc[point_index]['function']
