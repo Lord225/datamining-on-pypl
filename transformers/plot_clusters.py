@@ -3,6 +3,7 @@ from dask import dataframe as dd
 from dask.diagnostics import ProgressBar # type: ignore
 import plotly.express as px
 from dash import Dash, dcc, html, Input, Output
+from sqlalchemy import create_engine
 
 # Enable progress bar
 ProgressBar().register()
@@ -27,6 +28,8 @@ embeddings.columns = ['x', 'y']
 clusters.columns = ['cluster']
 clusters_embed = pd.concat([embeddings, clusters], axis=1)
 clusters_embed['cluster'] = clusters_embed['cluster'].astype('category')
+
+
 
 function_dict = functions.set_index('id')['name'].compute().to_dict()
 body_dict = functions.set_index('id')['body'].compute().to_dict()
