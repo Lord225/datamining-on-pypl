@@ -1,8 +1,8 @@
 import pandas as pd
 from dask import dataframe as dd
 from dask.diagnostics import ProgressBar # type: ignore
-import plotly.express as px
-from dash import Dash, dcc, html, Input, Output
+import plotly.express as px # type: ignore
+from dash import Dash, dcc, html, Input, Output # type: ignore
 from sqlalchemy import create_engine
 
 # Enable progress bar
