@@ -115,7 +115,6 @@ def encode_vae(embeddings):
     return embeddings_latent
 
 def encode_embeddings(text):
-    # cap to 4096 characters
     text_cap = [t[:4096] for t in text]
 
     embeddings = model.encode(text_cap, convert_to_tensor=True, batch_size=1, max_length=4096, device=device)
@@ -133,7 +132,6 @@ def generate_latent_space_of_text(text):
     return embeddings_latent
 
 
-# Load the data
 functions = dd.read_sql_table(  # type: ignore
     'functions',  
     'postgresql://postgres:8W0MQwY4DINCoX@localhost:5432/data-mining',
@@ -144,13 +142,10 @@ functions = dd.read_sql_table(  # type: ignore
 embeddings = pd.read_hdf(EMBEDDINGS, key='embeddings_3', mode='r')
 clusters = pd.read_hdf(CLUSTERS, key='clusters', mode='r')
 
-# Prepare the data
 embeddings.columns = ['x', 'y', 'z']
 clusters.columns = ['cluster']
 clusters_embed = pd.concat([embeddings, clusters], axis=1)
 clusters_embed['cluster'] = clusters_embed['cluster'].astype('category')
-
-
 
 function_dict = functions.set_index('id')['name'].compute().to_dict()
 body_dict = functions.set_index('id')['body'].compute().to_dict()
@@ -162,16 +157,12 @@ clusters_embed['function'] = clusters_embed.index.map(function_dict.get)
 clusters_embed['body'] = clusters_embed.index.map(body_dict.get)
 clusters_embed['index'] = clusters_embed.index
 
-# Limit dataset to 50,000 samples for visualization
 clusters_embed = clusters_embed[:100_000]
 
-
-# data bounds
 x_min, x_max = clusters_embed['x'].min(), clusters_embed['x'].max()
 y_min, y_max = clusters_embed['y'].min(), clusters_embed['y'].max()
 z_min, z_max = clusters_embed['z'].min(), clusters_embed['z'].max()
 
-# Plotly figure
 fig = px.scatter_3d(
     clusters_embed, 
     x='x', 
@@ -196,8 +187,6 @@ fig.update_layout(
     )
 )
 
-
-# Initialize Dash app
 app = Dash(__name__)
 
 app.layout = html.Div([
@@ -212,18 +201,15 @@ app.layout = html.Div([
     ])
 ])
 
-# Callback to update hover data
 @app.callback(
     Output('hover-data', 'children'),
     [Input('scatter-plot', 'hoverData')]
 )
 def display_hover_data(hoverData):
     if hoverData:
-        # Get the point's index
         print(hoverData)
         point_index = hoverData['points'][0]['customdata'][0]
         
-        # Retrieve the detailed function and body from clusters_embed for the hovered point
         function = clusters_embed.iloc[point_index]['function']
         body = clusters_embed.iloc[point_index]['body']
         
@@ -233,7 +219,6 @@ def display_hover_data(hoverData):
         ])
     return "Hover over a point to see details."
 
-# Callback to update scatter plot based on search input
 @app.callback(
     Output('scatter-plot', 'figure'),
     [Input('search-button', 'n_clicks')],
@@ -243,21 +228,17 @@ def search_function(n_clicks, search_input):
     if n_clicks and search_input:
         search_input = search_input.lower()
 
-        # if empty, clear the results
         if not search_input or search_input.isspace():
             return fig
         
-        # run embeddings through model
         embeddings_latent = generate_latent_space_of_text([search_input])
 
         # Calculate distances to the search input embedding
         distances = torch.cdist(embeddings_latent, torch.tensor(clusters_embed[['x', 'y', 'z']].values, dtype=torch.float32))
         closest_indices = distances.argsort(dim=1)[0][:500].numpy()  
 
-        # Filter the clusters_embed DataFrame to only include the closest points
         filtered_clusters_embed = clusters_embed.iloc[closest_indices]
 
-        # Update the figure with the filtered data
         fig_new = px.scatter_3d(
             filtered_clusters_embed, 
             x='x', 
@@ -284,7 +265,6 @@ def search_function(n_clicks, search_input):
 
         return fig_new
 
-    # Return the original figure if no search input
     return fig
 
 # Run the app
