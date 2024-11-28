@@ -166,10 +166,6 @@ def initialize_data():
         clusters_embed['index'] = clusters_embed.index
 
         cluster_colors = {cluster: color for cluster, color in zip(clusters_embed['cluster'].cat.categories, px.colors.qualitative.Light24)}
-        
-        # generate colors for clusters
-        colors = px.colors.qualitative.Light24
-        clusters_embed['color'] = clusters_embed['cluster'].apply(lambda x: colors[x])
 
         clusters_embed = clusters_embed[:100_000]
         full_embeddings = full_embeddings[:100_000]
@@ -273,7 +269,7 @@ def search_function(n_clicks, search_input, p, relayout_data, current_figure):
         # distances = torch.cdist(embeddings_latent, torch.tensor(clusters_embed[['x', 'y', 'z']].values, dtype=torch.float32))
         
         # use minkowski distance on original embeddings
-        distances = torch.cdist(embeddings, full_embeddings, p=p)
+        distances = torch.cdist(embeddings, full_embeddings, p=p) # type: ignore
         distances = distances.squeeze(0).squeeze(0)
         # print(full_embeddings)
         closest_indices = distances.argsort()[:100].numpy()
