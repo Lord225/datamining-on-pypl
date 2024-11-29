@@ -165,8 +165,6 @@ def initialize_data():
         clusters_embed['body'] = clusters_embed.index.map(body_dict.get)
         clusters_embed['index'] = clusters_embed.index
 
-        cluster_colors = {cluster: color for cluster, color in zip(clusters_embed['cluster'].cat.categories, px.colors.qualitative.Light24)}
-
         clusters_embed = clusters_embed[:100_000]
         full_embeddings = full_embeddings[:100_000]
         
