@@ -8,9 +8,13 @@ from sqlalchemy import create_engine
 # Enable progress bar
 ProgressBar().register()
 
-CLUSTERS = 'clusters_3.h5'
+# CLUSTERS = 'clusters_3.h5'
 
-EMBEDDINGS = 'embeddings_3.h5'
+# EMBEDDINGS = 'embeddings_3.h5'
+
+CLUSTERS = 'clusters_tnse.h5'
+
+EMBEDDINGS = 'latent_space_tnse.h5'
 
 # Load the data
 functions = dd.read_sql_table(  # type: ignore
