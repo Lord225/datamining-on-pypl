@@ -34,7 +34,6 @@ clusters_embed = pd.concat([embeddings, clusters], axis=1)
 clusters_embed['cluster'] = clusters_embed['cluster'].astype('category')
 
 
-
 function_dict = functions.set_index('id')['name'].compute().to_dict()
 body_dict = functions.set_index('id')['body'].compute().to_dict()
 
