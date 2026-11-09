@@ -4,3 +4,9 @@ __pycache__
 /database
 embeddings.h5
 /transformers/models
+
+# Generated artifacts are stored outside Git; previous copies are in the cleanup backup.
+/embeddings.hdf5
+/transformers/*.h5
+/transformers/*.pth
+/embeddings.hdf5
